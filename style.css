@@ -1,0 +1,22 @@
+.pokeCard {
+  display: flex;
+  flex-direction: column;
+  border-width: 2px;
+  border-style: solid;
+  border-color: black; 
+  align-items: center;
+  min-width: 30vw;
+  max-width: 250px;
+}
+
+#pokeball {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+}
+
+.pokePic {
+  width: 50%;
+}
