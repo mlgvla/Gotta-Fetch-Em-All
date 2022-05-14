@@ -8,7 +8,7 @@ function catchEm(int) {
   const gotcha = [];
 
   for (let i = 0; i < int; i++) {
-    rngResults.push(randomNumGen(1, 100));
+    rngResults.push(randomNumGen(1, 151));
   }
 
   rngResults.forEach((num) => {
@@ -26,6 +26,11 @@ function showEmOff(pokeArray) {
     let card = createCard(pokemon);
     document.querySelector("#pokeball").appendChild(card);
   });
+}
+
+function capitalizeWord(word) {
+  const capitalizedWord = word[0].toUpperCase() + word.slice(1);
+  return capitalizedWord;
 }
 
 function createCard(pokemonObj) {
@@ -73,11 +78,3 @@ function createCard(pokemonObj) {
 // Test code pls ignore
 let mahPokes = catchEm(6);
 showEmOff(mahPokes);
-
-// Card Data
-// Piccer
-// Name
-// Type
-// Height
-// Weight
-// Number
