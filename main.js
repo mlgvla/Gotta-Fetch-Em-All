@@ -29,9 +29,10 @@ function fetchEm(randomNum) {
   // Fetch a pokemon from passed in random num and call createCard() on it
   fetch(`https://pokeapi.co/api/v2/pokemon/${randomNum}`)
     .then((response) => response.json())
-    .then((data) => {
-      createPokemonCard(data, "wildPokemon");
-      sendDataToServer(data, "wildPokemon");
+    .then((data) => convertPokeObj(data))
+    .then((newPokemon) => {
+      createPokemonCard(newPokemon, "wildPokemon");
+      sendDataToServer(newPokemon, "wildPokemon");
     }
       );
 }
@@ -61,7 +62,7 @@ function createPokemonCard(pokemonObj, typeOfCard) {
   function cardPic() {
     let pokePic = document.createElement("img");
     pokePic.className = "card-img-top";
-    pokePic.src = `${pokemonObj.sprites.other["official-artwork"].front_default}`;
+    pokePic.src = `${pokemonObj.pic}`;
     return pokePic;
   }
 
@@ -75,7 +76,7 @@ function createPokemonCard(pokemonObj, typeOfCard) {
     let catchBtn = document.createElement("button");
     catchBtn.className = "btn btn-primary";
     catchBtn.textContent = "Throw a Pokeball!";
-    catchBtn.addEventListener("click", sendDataToServer);
+    catchBtn.addEventListener("click", catchPokemon);
     return catchBtn;
   }
 
@@ -85,7 +86,6 @@ function createPokemonCard(pokemonObj, typeOfCard) {
     runAwayBtn.id = "runAway";
     runAwayBtn.textContent = "Run Away!";
     runAwayBtn.addEventListener("click", () => {
-      deleteDataFromServer();
       clearWildPokemon();
       getAPokemon();
     });
@@ -125,11 +125,24 @@ function createPokemonCard(pokemonObj, typeOfCard) {
 function convertPokeObj(pokeObject) {
   // Saves relevant data retrieved from API
   let newPokemon = {
-    id: pokeObject.order,
+    //id: pokeObject.order,
     name: pokeObject.name,
+    pic: pokeObject.sprites.other["official-artwork"].front_default
   }
 
   return newPokemon
+}
+
+function catchPokemon() {
+  fetch(`http://localhost:3000/wildPokemon/1`)
+  .then(response => response.json())
+  .then(data => {
+    sendDataToServer(data, "caughtPokemon");
+    deleteDataFromServer();
+    clearWildPokemon();
+    getAPokemon();
+})
+
 }
 
 function sendDataToServer(pokeObject, whereToSend) {
@@ -139,7 +152,7 @@ function sendDataToServer(pokeObject, whereToSend) {
       "Content-Type": "application/json",
       "Accept": "application/json"
     },
-    body: JSON.stringify(convertPokeObj(pokeObject)),
+    body: JSON.stringify(pokeObject),
   };
 
   fetch(`http://localhost:3000/${whereToSend}`, configurationObject);
@@ -154,5 +167,5 @@ function deleteDataFromServer() {
     },
   };
 
-  fetch(`http://localhost:3000/wildPokemon/88`, configurationObject);
+  fetch(`http://localhost:3000/wildPokemon/1`, configurationObject);
 }

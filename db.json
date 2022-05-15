@@ -1,4 +1,10 @@
 {
-  "wildPokemon": [],
+  "wildPokemon": [
+    {
+      "name": "seadra",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/117.png",
+      "id": 1
+    }
+  ],
   "caughtPokemon": []
 }
