@@ -9,3 +9,29 @@
 #runAway {
   float: right;
 }
+
+#pokedexCase {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 25px;
+  min-height: 300px;
+  width: 95%;
+  text-align: center;
+}
+
+#pokedexDisplay {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.card {
+  width: 30vw;
+}
+
+.caught {
+  width: 15%;
+  margin: 5px;
+}
+

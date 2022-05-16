@@ -13,8 +13,27 @@ function getAPokemon() {
 }
 
 function clearWildPokemon() {
+  // clears current wild pokemon and returns its card
   const currentPokemon = document.querySelector("#wildPokemonContainer");
+  const pokeCard = currentPokemon.firstChild;
+  console.log(currentPokemon);
   currentPokemon.removeChild(currentPokemon.firstChild);
+  return pokeCard;
+}
+
+function moveCardToPokedex(card){
+  console.log(card);
+  const pokedex = document.querySelector("#pokedexDisplay");
+  card.className = "card caught";
+  let cardText = card.textContent.split(" ");
+  card.firstChild.textContent = cardText[2];
+  card.removeChild(card.lastChild);
+  let deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "remove";
+  deleteBtn.addEventListener("click", (e) => {
+    e.target.parentElement(remove());
+  })
+  pokedex.appendChild(card);
 }
 
 function capitalizeName(name) {
@@ -29,12 +48,11 @@ function fetchEm(randomNum) {
   // Fetch a pokemon from passed in random num and call createCard() on it
   fetch(`https://pokeapi.co/api/v2/pokemon/${randomNum}`)
     .then((response) => response.json())
-    .then((data) => convertPokeObj(data))
+    .then((data) => pokeObjHandler(data))
     .then((newPokemon) => {
       createPokemonCard(newPokemon, "wildPokemon");
-      sendDataToServer(newPokemon, "wildPokemon");
-    }
-      );
+      //sendDataToServer(newPokemon, "wildPokemon");
+    });
 }
 
 function createPokemonCard(pokemonObj, typeOfCard) {
@@ -50,7 +68,9 @@ function createPokemonCard(pokemonObj, typeOfCard) {
 
     switch (typeOfCard) {
       case "wildPokemon":
-        pokeHeader.textContent = `A wild ${capitalizeName(pokemonObj.name)} has appeared!`;
+        pokeHeader.textContent = `A wild ${capitalizeName(
+          pokemonObj.name
+        )} has appeared!`;
         break;
       case "caughtPokemon":
         pokeHeader.textContent = capitalizeName(pokemonObj.name);
@@ -76,7 +96,10 @@ function createPokemonCard(pokemonObj, typeOfCard) {
     let catchBtn = document.createElement("button");
     catchBtn.className = "btn btn-primary";
     catchBtn.textContent = "Throw a Pokeball!";
-    catchBtn.addEventListener("click", catchPokemon);
+    catchBtn.addEventListener("click", () => {
+      moveCardToPokedex(clearWildPokemon());
+      getAPokemon();
+    });
     return catchBtn;
   }
 
@@ -114,7 +137,9 @@ function createPokemonCard(pokemonObj, typeOfCard) {
       break;
 
     case "caughtPokemon":
-      const caughtPokemonContainer = document.querySelector("#caughtPokemonContainer");
+      const caughtPokemonContainer = document.querySelector(
+        "#caughtPokemonContainer"
+      );
       newCardContainer.appendChild(newCardHeader);
       newCardContainer.appendChild(newCardPic);
       caughtPokemonContainer.appendChild(newCardContainer);
@@ -122,27 +147,14 @@ function createPokemonCard(pokemonObj, typeOfCard) {
   }
 }
 
-function convertPokeObj(pokeObject) {
+function pokeObjHandler(pokeObject) {
   // Saves relevant data retrieved from API
   let newPokemon = {
-    //id: pokeObject.order,
     name: pokeObject.name,
-    pic: pokeObject.sprites.other["official-artwork"].front_default
-  }
+    pic: pokeObject.sprites.other["official-artwork"].front_default,
+  };
 
-  return newPokemon
-}
-
-function catchPokemon() {
-  fetch(`http://localhost:3000/wildPokemon/1`)
-  .then(response => response.json())
-  .then(data => {
-    sendDataToServer(data, "caughtPokemon");
-    deleteDataFromServer();
-    clearWildPokemon();
-    getAPokemon();
-})
-
+  return newPokemon;
 }
 
 function sendDataToServer(pokeObject, whereToSend) {
@@ -150,7 +162,7 @@ function sendDataToServer(pokeObject, whereToSend) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json"
+      Accept: "application/json",
     },
     body: JSON.stringify(pokeObject),
   };
@@ -163,7 +175,7 @@ function deleteDataFromServer() {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json"
+      Accept: "application/json",
     },
   };
 
