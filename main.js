@@ -26,81 +26,85 @@ function createBtn(btnText, btnClass) {
 function typeBackground(typeArray) {
   // Parses pokemon types and returns an array of background colors depending on type(s);
   const backgroundColors = {
-    normal : "#A15621",
-    fire : "#F08030",
-    fighting : "#C03028",
-    water : "#6890F0",
-    flying : "#B7A3F2",
-    grass : "#8FD16E",
-    poison : "#B061B0",
-    electric : "#F8D030",
-    ground : "#E0C068",
-    psychic : "#F85888",
-    rock : "#B8A038",
-    ice : "#98D8D8",
-    bug : "#B7C446",
-    dragon : "#885AF9",
-    ghost : "#705898",
-    steel : "#B8B8D0",
-    fairy : "#EE99AC"
-  }
+    normal: "#A15621",
+    fire: "#F08030",
+    fighting: "#C03028",
+    water: "#6890F0",
+    flying: "#B7A3F2",
+    grass: "#8FD16E",
+    poison: "#B061B0",
+    electric: "#F8D030",
+    ground: "#E0C068",
+    psychic: "#F85888",
+    rock: "#B8A038",
+    ice: "#98D8D8",
+    bug: "#B7C446",
+    dragon: "#885AF9",
+    ghost: "#705898",
+    steel: "#B8B8D0",
+    fairy: "#EE99AC",
+  };
 
-  const gradientColors = typeArray.map(element => backgroundColors[element]);
+  const gradientColors = typeArray.map((element) => backgroundColors[element]);
 
   return gradientColors;
 }
 
 function createCard(pokemonObj) {
-    const cardContainer = document.createElement("div");
-    cardContainer.className = "card";
+  const cardContainer = document.createElement("div");
+  cardContainer.className = "card";
 
-    const cardHeader = document.createElement("h3");
-    cardHeader.className = "card-header";
-    cardHeader.textContent = `A wild ${capitalizeName(pokemonObj.name)} has appeared!`;
-    cardContainer.appendChild(cardHeader);
+  const cardHeader = document.createElement("h3");
+  cardHeader.className = "card-header";
+  cardHeader.textContent = `A wild ${capitalizeName(
+    pokemonObj.name
+  )} has appeared!`;
+  cardContainer.appendChild(cardHeader);
 
-    const cardPic = document.createElement("img");
-    cardPic.className = "card-img-top";
-    cardPic.src = `${pokemonObj.pic}`;
-    const backgroundColors = typeBackground(pokemonObj.types);
-    cardPic.style['background-image'] = `linear-gradient(${backgroundColors.join(", ")}, #FFF)`
-    cardContainer.appendChild(cardPic);
+  const cardPic = document.createElement("img");
+  cardPic.className = "card-img-top";
+  cardPic.src = `${pokemonObj.pic}`;
+  const backgroundColors = typeBackground(pokemonObj.types);
+  cardPic.style["background-image"] = `linear-gradient(${backgroundColors.join(
+    ", "
+  )}, #FFF)`;
+  cardContainer.appendChild(cardPic);
 
-    const cardBody = document.createElement("div");
-    cardBody.className = "card-body";
-    cardContainer.appendChild(cardBody);
+  const cardBody = document.createElement("div");
+  cardBody.className = "card-body";
+  cardContainer.appendChild(cardBody);
 
-    const pokeballBtn = createBtn("Throw a PokeBall!", "btn btn-primary");
-    pokeballBtn.addEventListener("click", () => {
-      if (document.querySelector("#pokedexDisplay").childElementCount > 5) {
-        alert("Your PokeBag is full! Release some Pokemon to catch more!");
-      } else if (catchChance()){
+  const pokeballBtn = createBtn("Throw a PokeBall!", "btn btn-primary");
+  pokeballBtn.addEventListener("click", () => {
+    if (document.querySelector("#pokedexDisplay").childElementCount > 5) {
+      alert("Your PokeBag is full! Release some Pokemon to catch more!");
+    } else if (catchChance()) {
       moveCardToPokedex(clearWildPokemon());
       getAPokemon();
-      } else {
-        alert(`The wild ${capitalizeName(pokemonObj.name)} got away!`);
-        clearWildPokemon();
-        getAPokemon();
-      }
-    });
-    cardBody.appendChild(pokeballBtn);
-
-    const runBtn = createBtn("Run Away!", "btn btn-warning");
-    runBtn.addEventListener("click", () => {
+    } else {
+      alert(`The wild ${capitalizeName(pokemonObj.name)} got away!`);
       clearWildPokemon();
       getAPokemon();
-    });
-    cardBody.appendChild(runBtn);
+    }
+  });
+  cardBody.appendChild(pokeballBtn);
 
-    document.querySelector("#wildPokemonContainer").appendChild(cardContainer);
+  const runBtn = createBtn("Run Away!", "btn btn-warning");
+  runBtn.addEventListener("click", () => {
+    clearWildPokemon();
+    getAPokemon();
+  });
+  cardBody.appendChild(runBtn);
+
+  document.querySelector("#wildPokemonContainer").appendChild(cardContainer);
 }
 
 function pokeObjHandler(pokeObject) {
   // Saves relevant data retrieved from API
   let newPokeTypes = [];
-  pokeObject.types.forEach(element => {
+  pokeObject.types.forEach((element) => {
     newPokeTypes.push(element.type.name);
-  })
+  });
 
   let newPokemon = {
     name: pokeObject.name,
@@ -134,7 +138,7 @@ function clearWildPokemon() {
   return pokeCard;
 }
 
-function moveCardToPokedex(card){
+function moveCardToPokedex(card) {
   const pokedex = document.querySelector("#pokedexDisplay");
   card.className = "card caught";
 
@@ -148,11 +152,13 @@ function moveCardToPokedex(card){
   // add release button to card
   const deleteBtn = document.createElement("button");
   deleteBtn.textContent = "release";
-  deleteBtn.className = "btn btn-danger"
+  deleteBtn.className = "btn btn-danger";
   deleteBtn.addEventListener("click", (e) => {
-    alert(`${e.target.previousSibling.previousSibling.textContent} has been released back into the wild! They'll miss you!`);
+    alert(
+      `${e.target.previousSibling.previousSibling.textContent} has been released back into the wild! They'll miss you!`
+    );
     e.target.parentElement.remove();
-  })
+  });
   card.appendChild(deleteBtn);
 
   pokedex.appendChild(card);
