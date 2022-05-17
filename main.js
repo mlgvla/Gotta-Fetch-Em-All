@@ -16,7 +16,14 @@ function catchChance() {
   return Math.random() > 0.3;
 }
 
-function createBtn(btnText, btnClass) {
+function createNewElement(elType, elClass = "", text = "") {
+  const newElement = document.createElement(elType);
+  newElement.className = elClass;
+  newElement.textContent = text;
+  return newElement;
+}
+
+function createBtn(btnText = "", btnClass = "") {
   const newBtn = document.createElement("button");
   newBtn.textContent = btnText;
   newBtn.className = btnClass;
@@ -45,36 +52,31 @@ function typeBackground(typeArray) {
     fairy: "#EE99AC",
   };
 
-  const gradientColors = typeArray.map((element) => backgroundColors[element]);
+  const gradientColors = `linear-gradient(${typeArray
+    .map((element) => backgroundColors[element])
+    .join(",")} ,#FFF)`;
 
   return gradientColors;
 }
 
 function createCard(pokemonObj) {
-  const cardContainer = document.createElement("div");
-  cardContainer.className = "card";
-
-  const cardHeader = document.createElement("h3");
-  cardHeader.className = "card-header";
-  cardHeader.textContent = `A wild ${capitalizeName(
-    pokemonObj.name
-  )} has appeared!`;
-  cardContainer.appendChild(cardHeader);
-
-  const cardPic = document.createElement("img");
-  cardPic.className = "card-img-top";
-  cardPic.src = `${pokemonObj.pic}`;
-  const backgroundColors = typeBackground(pokemonObj.types);
-  cardPic.style["background-image"] = `linear-gradient(${backgroundColors.join(
-    ", "
-  )}, #FFF)`;
-  cardContainer.appendChild(cardPic);
-
-  const cardBody = document.createElement("div");
-  cardBody.className = "card-body";
-  cardContainer.appendChild(cardBody);
-
+  // create elements
+  const cardContainer = createNewElement("div", "card");
+  const cardHeader = createNewElement(
+    "h3",
+    "card-header",
+    `A wild ${capitalizeName(pokemonObj.name)} has appeared!`
+  );
+  const cardPic = createNewElement("img", "card-img-top");
+  const cardBody = createNewElement("div", "card-body");
   const pokeballBtn = createBtn("Throw a PokeBall!", "btn btn-primary");
+  const runBtn = createBtn("Run Away!", "btn btn-warning");
+
+  // add background pic colors to cardPic
+  cardPic.src = `${pokemonObj.pic}`;
+  cardPic.style["background-image"] = typeBackground(pokemonObj.types);
+
+  // add event listeners
   pokeballBtn.addEventListener("click", () => {
     if (document.querySelector("#pokedexDisplay").childElementCount > 5) {
       alert("Your PokeBag is full! Release some Pokemon to catch more!");
@@ -87,15 +89,17 @@ function createCard(pokemonObj) {
       getAPokemon();
     }
   });
-  cardBody.appendChild(pokeballBtn);
-
-  const runBtn = createBtn("Run Away!", "btn btn-warning");
   runBtn.addEventListener("click", () => {
     clearWildPokemon();
     getAPokemon();
   });
-  cardBody.appendChild(runBtn);
 
+  // build card
+  cardContainer.appendChild(cardHeader);
+  cardContainer.appendChild(cardPic);
+  cardContainer.appendChild(cardBody);
+  cardBody.appendChild(pokeballBtn);
+  cardBody.appendChild(runBtn);
   document.querySelector("#wildPokemonContainer").appendChild(cardContainer);
 }
 
