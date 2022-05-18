@@ -1,13 +1,19 @@
 // Execution Flow
 //----------------//
-// Generate random pokemon
-// each pokemon has a catch button
-// catch button randomly decides if your throw is successful
-// if successful the pokemon is added to your collection
-// if not, new pokemon is generated
+// Pull random pokemon from API, add catch & run away button options
+// Currently displayed wild pokemon is not stored on server and will change on refresh
+// Run away will pull a new pokemon from the API without refreshing page
+// Catch will check against a catch percentage to determine if pokemon is caught or gets away
+// If it gets away, the same functionality as the run away button is invoked
+// If caught, the pokemon's object data is stored on the server and a new card is created and appended to the Pokedex
+// The page does not pull data from the server to build the Pokedex unless the page is refreshed
+// On release, a pokemon's data is deleted from the server and the card removed from the Pokedex
 
+/* Init */
 getAPokemon();
+buildPokedex();
 
+/* Functions */
 function randomNumGen(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 }
@@ -21,13 +27,6 @@ function createNewElement(elType, elClass = "", text = "") {
   newElement.className = elClass;
   newElement.textContent = text;
   return newElement;
-}
-
-function createBtn(btnText = "", btnClass = "") {
-  const newBtn = document.createElement("button");
-  newBtn.textContent = btnText;
-  newBtn.className = btnClass;
-  return newBtn;
 }
 
 function typeBackground(typeArray) {
@@ -59,48 +58,83 @@ function typeBackground(typeArray) {
   return gradientColors;
 }
 
-function createCard(pokemonObj) {
-  // create elements
+function createBaseCard() {
   const cardContainer = createNewElement("div", "card");
-  const cardHeader = createNewElement(
-    "h3",
-    "card-header",
-    `A wild ${capitalizeName(pokemonObj.name)} has appeared!`
+  cardContainer.appendChild(createNewElement("h3", "card-header"));
+  cardContainer.appendChild(createNewElement("img", "card-img-top"));
+  cardContainer.appendChild(createNewElement("div", "card-body"));
+  return cardContainer;
+}
+
+function createWildCard(pokemonObj) {
+  // create buttons & listeners
+  const pokeballBtn = createNewElement(
+    "button",
+    "btn btn-primary",
+    "Throw a PokeBall!"
   );
-  const cardPic = createNewElement("img", "card-img-top");
-  const cardBody = createNewElement("div", "card-body");
-  const pokeballBtn = createBtn("Throw a PokeBall!", "btn btn-primary");
-  const runBtn = createBtn("Run Away!", "btn btn-warning");
+  const runBtn = createNewElement("button", "btn btn-warning", "Run Away!");
 
-  // add background pic colors to cardPic
-  cardPic.src = `${pokemonObj.pic}`;
-  cardPic.style["background-image"] = typeBackground(pokemonObj.types);
-
-  // add event listeners
   pokeballBtn.addEventListener("click", () => {
     if (document.querySelector("#pokedexDisplay").childElementCount > 5) {
       alert("Your PokeBag is full! Release some Pokemon to catch more!");
     } else if (catchChance()) {
-      moveCardToPokedex(clearWildPokemon());
+      sendDataToServer(pokemonObj, "pokedex");
+      createPokedexCard(pokemonObj);
+      clearWildPokemon();
       getAPokemon();
     } else {
-      alert(`The wild ${capitalizeName(pokemonObj.name)} got away!`);
+      alert(`The wild ${capitalizeName(pokemonObj.id)} got away!`);
       clearWildPokemon();
       getAPokemon();
     }
   });
+
   runBtn.addEventListener("click", () => {
     clearWildPokemon();
     getAPokemon();
   });
 
   // build card
-  cardContainer.appendChild(cardHeader);
-  cardContainer.appendChild(cardPic);
-  cardContainer.appendChild(cardBody);
-  cardBody.appendChild(pokeballBtn);
-  cardBody.appendChild(runBtn);
-  document.querySelector("#wildPokemonContainer").appendChild(cardContainer);
+  const newCard = createBaseCard();
+  newCard.children[0].textContent = `A wild ${capitalizeName(
+    pokemonObj.id
+  )} has appeared!`;
+  newCard.children[1].src = pokemonObj.pic;
+  newCard.children[1].style["background-image"] = typeBackground(
+    pokemonObj.types
+  );
+  newCard.children[2].appendChild(pokeballBtn);
+  newCard.children[2].appendChild(runBtn);
+
+  document.querySelector("#wildPokemonContainer").appendChild(newCard);
+}
+
+function createPokedexCard(pokemonObj) {
+  // create buttons & listeners
+  const deleteBtn = createNewElement("button", "btn btn-danger", "release");
+
+  deleteBtn.addEventListener("click", (e) => {
+    const pokeName = e.target.parentElement.previousSibling.previousSibling.textContent;
+    deleteDataFromServer("pokedex", pokeName.toLowerCase());
+    alert(
+      `${pokeName} has been released back into the wild! They'll miss you!`
+    );
+
+    e.target.parentElement.parentElement.remove();
+  });
+
+  // build card
+  const newCard = createBaseCard();
+  newCard.classList.add("caught");
+  newCard.children[0].textContent = capitalizeName(pokemonObj.id);
+  newCard.children[1].src = pokemonObj.pic;
+  newCard.children[1].style["background-image"] = typeBackground(
+    pokemonObj.types
+  );
+  newCard.children[2].appendChild(deleteBtn);
+
+  document.querySelector("#pokedexDisplay").appendChild(newCard);
 }
 
 function pokeObjHandler(pokeObject) {
@@ -111,7 +145,7 @@ function pokeObjHandler(pokeObject) {
   });
 
   let newPokemon = {
-    name: pokeObject.name,
+    id: pokeObject.name,
     pic: pokeObject.sprites.other["official-artwork"].front_default,
     types: newPokeTypes,
   };
@@ -120,12 +154,12 @@ function pokeObjHandler(pokeObject) {
 }
 
 function fetchEm(randomNum) {
-  // Fetch a pokemon from passed in random num and call createCard() on it
+  // Fetch a pokemon from passed in random num and call createWildCard() on it
   fetch(`https://pokeapi.co/api/v2/pokemon/${randomNum}`)
     .then((response) => response.json())
     .then((data) => pokeObjHandler(data))
     .then((newPokemon) => {
-      createCard(newPokemon);
+      createWildCard(newPokemon);
     });
 }
 
@@ -135,41 +169,24 @@ function getAPokemon() {
 }
 
 function clearWildPokemon() {
-  // clears current wild pokemon and returns its card
   const currentPokemon = document.querySelector("#wildPokemonContainer");
-  const pokeCard = currentPokemon.firstChild;
   currentPokemon.removeChild(currentPokemon.firstChild);
-  return pokeCard;
 }
 
-function moveCardToPokedex(card) {
-  const pokedex = document.querySelector("#pokedexDisplay");
-  card.className = "card caught";
-
-  // change card header to pokemon name
-  const cardText = card.textContent.split(" ");
-  card.firstChild.textContent = cardText[2];
-
-  // remove pokeball/run buttons
-  card.removeChild(card.lastChild);
-
-  // add release button to card
-  const deleteBtn = document.createElement("button");
-  deleteBtn.textContent = "release";
-  deleteBtn.className = "btn btn-danger";
-  deleteBtn.addEventListener("click", (e) => {
-    alert(
-      `${e.target.previousSibling.previousSibling.textContent} has been released back into the wild! They'll miss you!`
-    );
-    e.target.parentElement.remove();
-  });
-  card.appendChild(deleteBtn);
-
-  pokedex.appendChild(card);
+function buildPokedex() {
+  getDataFromServer("pokedex").then((data) =>
+    data.forEach((pokemon) => createPokedexCard(pokemon))
+  );
 }
 
 function capitalizeName(name) {
   return name[0].toUpperCase() + name.slice(1);
+}
+
+function getDataFromServer(location) {
+  return fetch(`http://localhost:3000/${location}`).then((response) =>
+    response.json()
+  );
 }
 
 function sendDataToServer(pokeObject, whereToSend) {
@@ -185,7 +202,7 @@ function sendDataToServer(pokeObject, whereToSend) {
   fetch(`http://localhost:3000/${whereToSend}`, configurationObject);
 }
 
-function deleteDataFromServer() {
+function deleteDataFromServer(location, pokemon) {
   const configurationObject = {
     method: "DELETE",
     headers: {
@@ -194,5 +211,5 @@ function deleteDataFromServer() {
     },
   };
 
-  fetch(`http://localhost:3000/wildPokemon/1`, configurationObject);
+  fetch(`http://localhost:3000/${location}/${pokemon}`, configurationObject);
 }
