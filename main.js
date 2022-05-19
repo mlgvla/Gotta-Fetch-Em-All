@@ -112,7 +112,8 @@ function createWildCard(pokemonObj) {
 
 function createPokedexCard(pokemonObj) {
   // create buttons & listeners
-  const deleteBtn = createNewElement("button", "btn btn-danger", "release");
+  const deleteBtn = createNewElement("button", "btn btn-danger", "Release");
+  const renameBtn = createNewElement("button", "btn btn-success", "Rename");
 
   deleteBtn.addEventListener("click", (e) => {
     const pokeName = e.target.parentElement.previousSibling.previousSibling.textContent;
@@ -124,14 +125,21 @@ function createPokedexCard(pokemonObj) {
     e.target.parentElement.parentElement.remove();
   });
 
+  renameBtn.addEventListener("click", e => {
+    const pokemonName = e.target.parentElement.previousSibling.previousSibling.textContent;
+    const nickname = prompt(`What nickname would you like to give ${pokemonName}?`).toLowerCase();
+    patchServerData("pokedex", pokemonName.toLowerCase(), nickname);
+  })
+
   // build card
   const newCard = createBaseCard();
   newCard.classList.add("caught");
-  newCard.children[0].textContent = capitalizeName(pokemonObj.id);
+  newCard.children[0].textContent = capitalizeName(pokemonObj.nickname);
   newCard.children[1].src = pokemonObj.pic;
   newCard.children[1].style["background-image"] = typeBackground(
     pokemonObj.types
   );
+  newCard.children[2].appendChild(renameBtn);
   newCard.children[2].appendChild(deleteBtn);
 
   document.querySelector("#pokedexDisplay").appendChild(newCard);
@@ -146,6 +154,7 @@ function pokeObjHandler(pokeObject) {
 
   let newPokemon = {
     id: pokeObject.name,
+    nickname: pokeObject.name,
     pic: pokeObject.sprites.other["official-artwork"].front_default,
     types: newPokeTypes,
   };
@@ -179,6 +188,10 @@ function buildPokedex() {
   );
 }
 
+function renamePokemon() {
+
+}
+
 function capitalizeName(name) {
   return name[0].toUpperCase() + name.slice(1);
 }
@@ -210,6 +223,19 @@ function deleteDataFromServer(location, pokemon) {
       Accept: "application/json",
     },
   };
+
+  fetch(`http://localhost:3000/${location}/${pokemon}`, configurationObject);
+}
+
+function patchServerData(location, pokemon, newValue) {
+  const configurationObject = {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify({nickname: newValue}),
+  }
 
   fetch(`http://localhost:3000/${location}/${pokemon}`, configurationObject);
 }
