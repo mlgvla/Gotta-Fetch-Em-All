@@ -10,8 +10,10 @@
 // On release, a pokemon's data is deleted from the server and the card removed from the Pokedex
 
 /* Init */
+document.addEventListener("DOMContentLoaded", async () => {
 getAPokemon();
-buildPokedex();
+buildPokedex(await getDataFromServer("pokedex"));
+})
 
 /* Functions */
 function randomNumGen(min, max) {
@@ -79,26 +81,21 @@ function createWildCard(pokemonObj) {
     if (document.querySelector("#pokedexDisplay").childElementCount > 5) {
       alert("Your PokeBag is full! Release some Pokemon to catch more!");
     } else if (catchChance()) {
-      sendDataToServer(pokemonObj, "pokedex");
-      createPokedexCard(pokemonObj);
-      clearWildPokemon();
-      getAPokemon();
+      caughtPokemon(pokemonObj);
     } else {
-      alert(`The wild ${capitalizeName(pokemonObj.id)} got away!`);
-      clearWildPokemon();
+      alert(`The wild ${capitalizeName(pokemonObj.name)} got away!`);
       getAPokemon();
     }
   });
 
   runBtn.addEventListener("click", () => {
-    clearWildPokemon();
     getAPokemon();
   });
 
   // build card
   const newCard = createBaseCard();
   newCard.children[0].textContent = `A wild ${capitalizeName(
-    pokemonObj.id
+    pokemonObj.name
   )} has appeared!`;
   newCard.children[1].src = pokemonObj.pic;
   newCard.children[1].style["background-image"] = typeBackground(
@@ -116,31 +113,34 @@ function createPokedexCard(pokemonObj) {
   const renameBtn = createNewElement("button", "btn btn-success", "Rename");
 
   deleteBtn.addEventListener("click", (e) => {
-    const pokeName = e.target.parentElement.previousSibling.previousSibling.textContent;
-    deleteDataFromServer("pokedex", pokeName.toLowerCase());
+    const pokeName = e.target.parentElement.firstChild.textContent;
+    releasePokemon(pokeName);
     alert(
       `${pokeName} has been released back into the wild! They'll miss you!`
     );
 
-    e.target.parentElement.parentElement.remove();
+    e.target.parentElement.remove();
   });
 
-  renameBtn.addEventListener("click", e => {
-    const pokemonName = e.target.parentElement.previousSibling.previousSibling.textContent;
-    const nickname = prompt(`What nickname would you like to give ${pokemonName}?`).toLowerCase();
-    patchServerData("pokedex", pokemonName.toLowerCase(), nickname);
-  })
+  renameBtn.addEventListener("click", (e) => {
+    const pokeName = e.target.parentElement.firstChild.textContent;
+    const nickname = prompt(
+      `What nickname would you like to give ${pokeName}?`
+    ).toLowerCase();
+    changePokemonName(pokeName, nickname);
+    e.target.parentElement.firstChild.textContent = capitalizeName(nickname);
+  });
 
   // build card
   const newCard = createBaseCard();
   newCard.classList.add("caught");
-  newCard.children[0].textContent = capitalizeName(pokemonObj.nickname);
+  newCard.children[0].textContent = capitalizeName(pokemonObj.name);
   newCard.children[1].src = pokemonObj.pic;
   newCard.children[1].style["background-image"] = typeBackground(
     pokemonObj.types
   );
-  newCard.children[2].appendChild(renameBtn);
-  newCard.children[2].appendChild(deleteBtn);
+  newCard.appendChild(renameBtn);
+  newCard.appendChild(deleteBtn);
 
   document.querySelector("#pokedexDisplay").appendChild(newCard);
 }
@@ -153,8 +153,8 @@ function pokeObjHandler(pokeObject) {
   });
 
   let newPokemon = {
-    id: pokeObject.name,
-    nickname: pokeObject.name,
+    name: pokeObject.name,
+    species: pokeObject.name,
     pic: pokeObject.sprites.other["official-artwork"].front_default,
     types: newPokeTypes,
   };
@@ -175,34 +175,53 @@ function fetchEm(randomNum) {
 function getAPokemon() {
   // range (1, 151) for gen 1 pokemon
   fetchEm(randomNumGen(1, 151));
+  // clear current wild pokemon
+  document.querySelector("#wildPokemonContainer").replaceChildren();
 }
 
-function clearWildPokemon() {
-  const currentPokemon = document.querySelector("#wildPokemonContainer");
-  currentPokemon.removeChild(currentPokemon.firstChild);
+function findPokemonID(pokedexArray, pokemonName) {
+  for (object of pokedexArray) {
+    if (object.name === pokemonName) {
+      return object.id;
+    }
+  }
 }
 
-function buildPokedex() {
-  getDataFromServer("pokedex").then((data) =>
-    data.forEach((pokemon) => createPokedexCard(pokemon))
-  );
+function buildPokedex(pokedexArray) {
+  document.querySelector("#pokedexDisplay").replaceChildren();
+  pokedexArray.forEach((pokemonObj) => createPokedexCard(pokemonObj));
 }
 
-function renamePokemon() {
+async function caughtPokemon(pokemon) {
+  const response = await sendDataToServer(pokemon, "pokedex");
+  buildPokedex(await getDataFromServer("pokedex"));
+  getAPokemon();
+  return response;
+}
 
+async function releasePokemon(name) {
+  const pokeID = findPokemonID(await getDataFromServer("pokedex"), name.toLowerCase());
+  deleteDataFromServer("pokedex", pokeID);
+}
+
+async function changePokemonName(oldName, newName) {
+  const pokeID = findPokemonID(await getDataFromServer("pokedex"), oldName.toLowerCase());
+  console.log(pokeID);
+  patchData("pokedex", pokeID, newName);
 }
 
 function capitalizeName(name) {
   return name[0].toUpperCase() + name.slice(1);
 }
 
-function getDataFromServer(location) {
-  return fetch(`http://localhost:3000/${location}`).then((response) =>
-    response.json()
-  );
+/* Server Functions */
+async function getDataFromServer(location) {
+  const response = await fetch(`http://localhost:3000/${location}`);
+  const data = await response.json();
+  return data;
 }
 
-function sendDataToServer(pokeObject, whereToSend) {
+async function sendDataToServer(pokeObject, whereToSend) {
   const configurationObject = {
     method: "POST",
     headers: {
@@ -212,10 +231,15 @@ function sendDataToServer(pokeObject, whereToSend) {
     body: JSON.stringify(pokeObject),
   };
 
-  fetch(`http://localhost:3000/${whereToSend}`, configurationObject);
+  const response = await fetch(
+    `http://localhost:3000/${whereToSend}`,
+    configurationObject
+  );
+  console.log(response);
+  return response;
 }
 
-function deleteDataFromServer(location, pokemon) {
+async function deleteDataFromServer(location, pokemon) {
   const configurationObject = {
     method: "DELETE",
     headers: {
@@ -224,18 +248,26 @@ function deleteDataFromServer(location, pokemon) {
     },
   };
 
-  fetch(`http://localhost:3000/${location}/${pokemon}`, configurationObject);
+  const response = await fetch(
+    `http://localhost:3000/${location}/${pokemon}`,
+    configurationObject
+  );
+  return response;
 }
 
-function patchServerData(location, pokemon, newValue) {
+async function patchData(location, ID, newValue) {
   const configurationObject = {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
     },
-    body: JSON.stringify({nickname: newValue}),
-  }
+    body: JSON.stringify({name: newValue}),
+  };
 
-  fetch(`http://localhost:3000/${location}/${pokemon}`, configurationObject);
+  const response = await fetch(
+    `http://localhost:3000/${location}/${ID}`,
+    configurationObject
+  );
+  return response;
 }

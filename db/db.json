@@ -1,0 +1,41 @@
+{
+  "pokedex": [
+    {
+      "name": "hitmonchan",
+      "species": "hitmonchan",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/107.png",
+      "types": [
+        "fighting"
+      ],
+      "id": 1
+    },
+    {
+      "name": "slowpoke",
+      "species": "slowpoke",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/79.png",
+      "types": [
+        "water",
+        "psychic"
+      ],
+      "id": 2
+    },
+    {
+      "name": "wazzle",
+      "species": "weezing",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/110.png",
+      "types": [
+        "poison"
+      ],
+      "id": 4
+    },
+    {
+      "name": "daniel",
+      "species": "dragonair",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/148.png",
+      "types": [
+        "dragon"
+      ],
+      "id": 5
+    }
+  ]
+}

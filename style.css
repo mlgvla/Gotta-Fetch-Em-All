@@ -17,6 +17,10 @@ body {
 	}
 }
 
+h1 {
+  text-align: center;
+}
+
 #wildPokemonContainer {
   display: flex;
   flex-direction: row;
