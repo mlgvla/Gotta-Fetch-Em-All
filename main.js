@@ -206,7 +206,6 @@ async function releasePokemon(name) {
 
 async function changePokemonName(oldName, newName) {
   const pokeID = findPokemonID(await getDataFromServer("pokedex"), oldName.toLowerCase());
-  console.log(pokeID);
   patchData("pokedex", pokeID, newName);
 }
 
@@ -235,7 +234,6 @@ async function sendDataToServer(pokeObject, whereToSend) {
     `http://localhost:3000/${whereToSend}`,
     configurationObject
   );
-  console.log(response);
   return response;
 }
 
