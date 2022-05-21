@@ -1,0 +1,4 @@
+# Gotta Fetch 'Em All!
+**A JavaScript learning project**
+
+Gotta Fetch 'Em All is a web application that utilizes HTML, CSS, JavaScript, and json-server to demonstrate the lessons taught in Phase 1 of Flatiron School's Software Development Bootcamp. The app utilizes the PokeAPI (https://pokeapi.co/?ref=public-apis) for individual pokemon data, and allows the user to encounter random Pokemon and attempt to catch them to add them to their personal Pokedex. Once they've caught a Pokemon, a user may give that Pokemon a name, or release them back into the wild to free up space in their bag. The application stores the user's Pokedex as JSON data, allowing the Pokedex to persist through page reloads. This project utilizes Bootstrap (https://getbootstrap.com/) for the base CSS formatting. 

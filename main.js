@@ -1,14 +1,3 @@
-// Execution Flow
-//----------------//
-// Pull random pokemon from API, add catch & run away button options
-// Currently displayed wild pokemon is not stored on server and will change on refresh
-// Run away will pull a new pokemon from the API without refreshing page
-// Catch will check against a catch percentage to determine if pokemon is caught or gets away
-// If it gets away, the same functionality as the run away button is invoked
-// If caught, the pokemon's object data is stored on the server and a new card is created and appended to the Pokedex
-// The page does not pull data from the server to build the Pokedex unless the page is refreshed
-// On release, a pokemon's data is deleted from the server and the card removed from the Pokedex
-
 /* Init */
 document.addEventListener("DOMContentLoaded", onPageLoad);
 
@@ -32,6 +21,7 @@ function buildPokedex(pokedexArray) {
   // Clears current children from the pokedex and builds pokedex cards for each object in the passed in array
   clearDOM("#pokedexDisplay");
   pokedexArray.forEach((pokemonObj) => createPokedexCard(pokemonObj));
+  checkPokedexPopulated();
 }
 
 function createWildCard(pokemonObj) {
@@ -72,6 +62,7 @@ function createPokedexCard(pokemonObj) {
     releasePokemon(pokeName);
     alert(`${pokeName} has been released back into the wild! They'll miss you!`);
     e.target.parentElement.remove();
+    checkPokedexPopulated();
   });
 
   renameBtn.addEventListener("click", (e) => {
@@ -104,7 +95,8 @@ async function releasePokemon(name) {
   // removes pokemon from the local server
   const pokeArray = await retrieveLocalData("pokedex");
   const pokeID = findPokemonID(pokeArray, name.toLowerCase())
-  deleteLocalData("pokedex", pokeID);
+  await deleteLocalData("pokedex", pokeID);
+  //buildPokedex(await retrieveLocalData("pokedex"));
 }
 
 async function changePokemonName(oldName, newName) {
@@ -114,7 +106,13 @@ async function changePokemonName(oldName, newName) {
   patchLocalData("pokedex", pokeID, newName);
 }
 
-/* Base Level Functions */
+/* Base Functions */
+function checkPokedexPopulated() {
+  if (document.querySelector("#pokedexDisplay").childElementCount === 0) {
+    document.querySelector("#pokedexDisplay").textContent = "No Pokemon currently in your bag! Catch some to start your collection!"
+  }
+}
+
 async function fetchEm(randomNum) {
   // accepts a random number and retrieves pokemon json data from API
   const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${randomNum}`);
