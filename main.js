@@ -96,7 +96,6 @@ async function releasePokemon(name) {
   const pokeArray = await retrieveLocalData("pokedex");
   const pokeID = findPokemonID(pokeArray, name.toLowerCase())
   await deleteLocalData("pokedex", pokeID);
-  //buildPokedex(await retrieveLocalData("pokedex"));
 }
 
 async function changePokemonName(oldName, newName) {
