@@ -22,4 +22,4 @@ Planned features:
 </ul>
 
 Useage:
-Clone the repository to your local environment, and then run ```npm install``` to install the project's dependencies. Once installed, run ```npm run dev``` to start the local server. Open the index.html page in any modern browser, and go catch some Pokemon!
+Clone the repository to your local environment, and then run ```npm install``` to install the project's dependencies. Once installed, run ```npm run dev``` to start the local server. Open the index.html page in any modern browser, and go catch some Pokemon! Run ```npm run seeds``` at anytime to reset the local server to the inital state.
