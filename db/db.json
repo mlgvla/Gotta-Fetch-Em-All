@@ -1,3 +1,61 @@
 {
-  "pokedex": []
+  "pokedex": [
+    {
+      "name": "vileplume",
+      "species": "vileplume",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/45.png",
+      "types": [
+        "grass",
+        "poison"
+      ],
+      "id": 7
+    },
+    {
+      "name": "sandslash",
+      "species": "sandslash",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/28.png",
+      "types": [
+        "ground"
+      ],
+      "id": 8
+    },
+    {
+      "name": "abe",
+      "species": "pidgeot",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/18.png",
+      "types": [
+        "normal",
+        "flying"
+      ],
+      "id": 9
+    },
+    {
+      "name": "dewgong",
+      "species": "dewgong",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/87.png",
+      "types": [
+        "water",
+        "ice"
+      ],
+      "id": 10
+    },
+    {
+      "name": "xavier",
+      "species": "nidoran-m",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/32.png",
+      "types": [
+        "poison"
+      ],
+      "id": 11
+    },
+    {
+      "name": "sandshrew",
+      "species": "sandshrew",
+      "pic": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/27.png",
+      "types": [
+        "ground"
+      ],
+      "id": 12
+    }
+  ]
 }

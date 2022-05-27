@@ -215,6 +215,7 @@ function capitalizeName(name) {
 async function retrieveLocalData(location) {
   const response = await fetch(`http://localhost:3000/${location}`);
   const data = await response.json();
+  data.sort((a,b) => a.name.localeCompare(b.name))
   return data;
 }
 
